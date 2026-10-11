@@ -1,0 +1,319 @@
+// nōmən styles: Bootstrap 5 with the Bootswatch "Lumen" theme, plus the few rules the
+// game board needs that Bootstrap has no component for.
+//
+// Lumen is compiled from source rather than taken prebuilt for one reason: the prebuilt
+// CSS fetches its font from Google Fonts at runtime, and this game must work offline and
+// make no network calls. The font is bundled instead (see src/main.tsx).
+$web-font-path: false;
+$enable-dark-mode: false; // Lumen is a light theme
+
+@import 'bootswatch/dist/lumen/variables';
+
+// Only the parts of Bootstrap the game uses.
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/maps';
+@import 'bootstrap/scss/mixins';
+@import 'bootstrap/scss/utilities';
+@import 'bootstrap/scss/root';
+@import 'bootstrap/scss/reboot';
+@import 'bootstrap/scss/type';
+@import 'bootstrap/scss/containers';
+@import 'bootstrap/scss/grid';
+@import 'bootstrap/scss/buttons';
+@import 'bootstrap/scss/navbar';
+@import 'bootstrap/scss/card';
+@import 'bootstrap/scss/nav';
+@import 'bootstrap/scss/tables';
+@import 'bootstrap/scss/progress';
+@import 'bootstrap/scss/alert';
+@import 'bootstrap/scss/helpers';
+@import 'bootstrap/scss/utilities/api';
+
+@import 'bootswatch/dist/lumen/bootswatch';
+
+// ---------- Game-specific rules ----------
+
+$touch-target: 44px;
+$tile-gap: 8px;
+
+body {
+  min-height: 100dvh;
+  overflow-x: hidden;
+  touch-action: manipulation;
+}
+
+// Every control is comfortably tappable, whatever Bootstrap size it uses.
+.btn {
+  min-width: $touch-target;
+  min-height: $touch-target;
+  font-weight: $font-weight-bold;
+}
+
+.btn:focus-visible,
+.tile:focus-visible {
+  outline: 3px solid $gray-900;
+  outline-offset: 2px;
+}
+
+.app-bar {
+  padding-top: max(0.25rem, env(safe-area-inset-top));
+  padding-bottom: 0.25rem;
+}
+
+.wordmark {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+// Page links in the app bar. White on Lumen blue only passes contrast as large bold text,
+// hence the size and weight.
+.app-bar .nav-link {
+  display: flex;
+  align-items: center;
+  min-height: $touch-target;
+  padding: 0 0.4rem;
+  border-bottom: 3px solid transparent;
+  color: $white;
+  font-size: 1.17rem;
+  font-weight: $font-weight-bold;
+
+  &:hover,
+  &:focus {
+    color: $white;
+  }
+
+  &:focus-visible {
+    outline: 3px solid $white;
+    outline-offset: -3px;
+  }
+
+  // The current page is underlined, not just tinted.
+  &[aria-current='page'] {
+    border-bottom-color: $white;
+  }
+}
+
+// Static pages
+
+.page {
+  h2:focus {
+    outline: none;
+  }
+
+  h3 {
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: $font-weight-bold;
+  }
+
+  ul {
+    padding-left: 1.2rem;
+  }
+
+  li + li {
+    margin-top: 0.25rem;
+  }
+
+  .letter {
+    display: inline-block;
+    min-width: 1.4em;
+    font-weight: $font-weight-bold;
+  }
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 560px;
+  padding-top: 12px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+.score__label,
+.score__target {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+.score__number,
+.clock__text {
+  font-variant-numeric: tabular-nums;
+}
+
+.score__stat {
+  min-width: 56px;
+}
+
+.clock .progress {
+  height: 14px;
+}
+
+.clock__text {
+  min-width: 5ch;
+  font-size: 1.125rem;
+}
+
+// Word tray
+
+.tray__slots {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+}
+
+.tray__slot {
+  display: grid;
+  place-items: center;
+  height: clamp(32px, 10vw, 48px);
+  border-bottom: 3px solid $gray-300;
+  font-size: clamp(1.1rem, 5vw, 1.75rem);
+  font-weight: $font-weight-bold;
+}
+
+.tray__slot--filled {
+  border-bottom-color: $primary;
+}
+
+.tray__slots--nudge {
+  animation: nudge 240ms ease-in-out;
+}
+
+@keyframes nudge {
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+.feedback {
+  min-height: 1.5em;
+}
+
+// Board: Lumen's raised buttons make natural letter tiles.
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $tile-gap;
+}
+
+.tile {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: 0;
+}
+
+.tile__letter {
+  font-size: clamp(1.5rem, 8vw, 2.25rem);
+  line-height: 1;
+}
+
+.tile__value {
+  position: absolute;
+  right: 8px;
+  bottom: 4px;
+  font-size: 0.8rem;
+}
+
+// A used tile is flattened, hollowed and dashed, so the change never relies on colour.
+.tile[aria-pressed='true'] {
+  border: 2px dashed $gray-600;
+  background: transparent;
+  color: $gray-700;
+  cursor: default;
+
+  &:hover,
+  &:active {
+    margin-top: 0;
+    border-width: 2px;
+    background: transparent;
+    color: $gray-700;
+  }
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $tile-gap;
+
+  .btn {
+    padding-inline: 4px;
+  }
+}
+
+.controls__submit {
+  grid-column: 1 / -1;
+}
+
+.summary dt {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+// Wide screens and landscape: two rows of six tiles.
+@media (min-width: 720px), (orientation: landscape) and (min-width: 560px) {
+  .app {
+    max-width: 720px;
+  }
+
+  .board {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .controls {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .controls__submit {
+    grid-column: auto;
+    font-size: $btn-font-size;
+  }
+}
+
+// Short phones: tighten everything so the whole game fits without scrolling.
+@media (max-height: 640px) and (orientation: portrait) {
+  .app {
+    gap: 8px;
+    padding-top: 8px;
+  }
+
+  .wordmark {
+    font-size: 1.25rem;
+  }
+
+  .tile {
+    aspect-ratio: 4 / 3;
+  }
+
+  .score .card-body {
+    padding-block: 0.25rem;
+  }
+
+  .controls__submit {
+    font-size: $btn-font-size;
+  }
+}
+
+@media (max-width: 359px) {
+  .controls .btn {
+    font-size: 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
